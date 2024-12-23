@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_ternakin
+    restart: always
+    environment:
+      - MYSQL_DATABASE= db_ternakin
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  client:
+    build: .
+    container_name: frontend-ternakin
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: ./backend-express
+    container_name: backend-ternakin
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: mysql://root:@mysql:3306/db_ternakin
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
